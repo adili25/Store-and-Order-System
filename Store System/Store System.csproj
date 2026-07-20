@@ -8,11 +8,4 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
-  <ItemGroup>
-    <Folder Include="Extentions\" />
-    <Folder Include="Iterators\" />
-    <Folder Include="Exceptions\" />
-    <Folder Include="Reports\" />
-  </ItemGroup>
-
 </Project>

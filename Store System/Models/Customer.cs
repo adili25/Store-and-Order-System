@@ -4,13 +4,11 @@ using System.Text;
 
 namespace Store_System.Models
 {
-
-   
     internal class Customer : Person
     {
         public CustomerType CustomerType { get; private set; }
 
-        public DateTime RegistrationDate { get; private set }
+        public DateTime RegistrationDate { get; private set; }
 
         //base(...) passing the props to the Person class
         public Customer(string name, string email, CustomerType type) : base(name, email)
@@ -18,8 +16,6 @@ namespace Store_System.Models
             RegistrationDate = DateTime.Now;
 
             CustomerType = type;
-
-            //here will be the logic of CustomerType 
         }
 
         public override void DisplayInfo()

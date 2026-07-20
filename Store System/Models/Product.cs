@@ -20,6 +20,7 @@ namespace Store_System.Models
             {
                 //inform the user that nothing changes
                 Console.WriteLine("invalid quantity");
+                return;
             }
 
             this.QuantityInStock -= quantity;
@@ -30,6 +31,7 @@ namespace Store_System.Models
             if (quantity <= 0)
             {
                 Console.WriteLine("invalid quantity");
+                return;
             }
 
             this.QuantityInStock += quantity;
@@ -51,9 +53,8 @@ Quantity in stock: {this.QuantityInStock}
 
         public Product(string name, string category, decimal price, int quantity)
         {
-            name = name.Trim();
-
-            if (string.IsNullOrEmpty(name))
+            
+            if (string.IsNullOrWhiteSpace(name))
             {
                 throw new Exception("INVALID NAME: IS_NULL_OR_EMPTY VALIDATION FAILED");
             }
@@ -61,9 +62,7 @@ Quantity in stock: {this.QuantityInStock}
             Name = name;
 
 
-            category = category.Trim();
-
-            if (string.IsNullOrEmpty(category))
+            if (string.IsNullOrWhiteSpace(category))
             {
                 throw new Exception("INVALID CATEGORY: IS_NULL_OR_EMPTY VALIDATION FAILED");
             }

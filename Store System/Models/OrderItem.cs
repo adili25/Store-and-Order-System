@@ -6,17 +6,18 @@ namespace Store_System.Models
 {
     internal class OrderItem
     {
-        public string ProductId { get; private set; } = Guid.NewGuid().ToString();
+        public string ProductId { get; private set; }
         public int Quantity { get; private set; }
         public decimal UnitPrice { get; private set; }
 
-        //TotalPrice is a computed prop, TotalPrice() is a method
         public decimal TotalPrice => this.Quantity * this.UnitPrice;
 
 
         //the constructor here automatilly lock in the UnitPrice
-        public OrderItem(int quantity, decimal unitPrice)
+        public OrderItem(string productId, int quantity, decimal unitPrice)
         {
+            ProductId = productId;
+
             if (quantity < 0)
             {
                 throw new Exception("INVALID QUANTITY: MUST BE GRATER THAN ZERO");

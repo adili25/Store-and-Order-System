@@ -29,7 +29,7 @@ Select an option:
 
         string? option;
 
-        do
+        while (true)
         {
             DisplayOptions();
 
@@ -39,7 +39,7 @@ Select an option:
             {
                 if (intOption >= 1 && intOption <= 12)
                 {
-                    //all the logic will be called here
+                    //all the fuctions will be called here
                 }
 
                 else if (intOption == 13)
@@ -59,6 +59,6 @@ Select an option:
                 Console.WriteLine("INVALID OPTION: MUST BE NUMBER");
             }
 
-        } while (true);
+        }
     }
 }
