@@ -207,22 +207,49 @@ Select an option:
 
                     case 4:
                         //cancel order
+                        Console.WriteLine("enter the order id: ");
 
+                        string? inputOrderId = Console.ReadLine();
+
+                        if (string.IsNullOrWhiteSpace(inputOrderId))
+                        {
+                            Console.WriteLine("invalid order id: is_null_or_whitespace");
+                            continue;
+                        }
+
+                        service.CancelOrder(inputOrderId);
                         break;
 
                     case 5:
                         //dispaly customers
+                        IEnumerable<Customer> customers = service.GetCustomers();
+
+                        foreach (var customer in customers)
+                        {
+                            customer.DisplayInfo();
+                        }
 
                         break;
 
                     case 6:
                         //display products
+                        IEnumerable<Product> products = service.GetProducts();
+
+                        foreach (var product in products)
+                        {
+                            product.DisplayInfo();
+                        }
 
                         break;
 
                     case 7:
                         //display orders
-                        
+                        IEnumerable<Order> orders = service.GetOrders();
+
+                        foreach (var order in orders)
+                        {
+                            //order.DisplayInfo();
+                        }
                         break;
                     
                     case 8:
@@ -232,7 +259,7 @@ Select an option:
 
                     case 9:
                         //display slaes reports
-
+                        
                         break;
 
                     case 10:

@@ -12,6 +12,8 @@ namespace Store_System.Models
         public List<OrderItem> Items { get; private set; } = new List<OrderItem>();
         public OrderStatus Status { get; private set; }
 
+        //build display info for the order class (case 7 in the main)
+
 
         public void AddItem(OrderItem item)
         {
