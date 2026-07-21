@@ -141,6 +141,64 @@ namespace Store_System.Reports
                    .Select(o => o.CalculateSubtotal())
                    .Aggregate(0m, (curr, next) => curr + next);
         }
+
+        public string OrderItemTextSummary()
+        {
+            return _products.Aggregate("", (currText, nextItem) =>
+            currText + $"{nextItem.Name} x {nextItem.QuantityInStock}, ").TrimEnd(',', ' ');
+            // the TrimEnd for removing the comma and space at the end of the string
+        }
+
+
+        //check about making the IEnumerable<(string customerName, ....)> to IEnumerable<record>
+        //check about using yield return for all these reportes
+        public IEnumerable<(string customerName, int completedOrdersCount, decimal totalSpend, decimal avgOrderValue)> CustomersRankedBySpending()
+        {
+            var completedOrders = _orders.Where(order => order.Status == OrderStatus.Completed);
+
+            return _customers.GroupJoin(
+                completedOrders,
+                customer => customer.Id,
+                order => order.CustomerId,
+                (customer, customerOrders) =>
+                (
+                    customerName: customer.FullName,
+                    completedOrderCount: customerOrders.Count(),
+                    totalSpend: customerOrders.Sum(order => order.CalculateSubtotal()),
+                    avgOrderValue: customerOrders.Any() ? customerOrders.Average(order => order.CalculateSubtotal()) : 0m
+                )).OrderByDescending(summary => summary.totalSpend);
+        }
+
+        public IEnumerable<(string productName, int quantitySold, decimal totalSales)> BestSellingProducts()
+        {
+            var completedOrders = _orders.Any() ? _orders.Where(order => order.Status == OrderStatus.Completed) : return IEnumerable<(string productName, int quantitySold, decimal totalSales)>();
+
+            var ProductIdResult = completedOrders?.SelectMany(order => order.Items)
+                                  .GroupBy(product => product.ProductId)
+                                  .Select(productGroup => (
+                                            productId: productGroup.Key,
+                                            quantitySold: productGroup.Sum(order => order.Quantity),
+                                            totalSales: productGroup.Sum(order => order.UnitPrice)
+                                           ))
+                                  .OrderByDescending(products => products.quantitySold)
+                                  .ThenByDescending(products => products.totalSales);
+            
+            //nullable problem here
+            return ProductIdResult.Join(
+                _products,
+                IdProduct => IdProduct.productId,
+                products => products.Name
+                (idProduct, product) => (
+                    productName: product.Name,
+                    quantitySold: idProduct.quantitySold,
+                    totalSales: idProduct.totalSales
+                )
+                );
+        }
+
+
+
+
         
     }
 }
