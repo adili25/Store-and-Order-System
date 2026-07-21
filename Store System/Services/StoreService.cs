@@ -56,33 +56,28 @@ Final Total: {newOrder.CalculateFinalTotal(CurrentCustomer)}
 
         public void CreateOrder(string customerId, Dictionary<string, int> itemQuantityDictionary)
         {
-
-
-            //should i throw an error, or "invalid Id" msg to the user?
             if (!Customers.Any(c => c.Id == customerId))
             {
                 //throw new exception
             }
 
+            //add try-catch block
             Order newOrder = new Order(customerId);
 
             Orders.Add(newOrder);
-
-            
 
             //merge the duplicate items
             foreach (var itemQuantity in itemQuantityDictionary)
             {
                 //TryAdd: it try to add the key if its not added, return true if its new, and false if its already included
-                if (!itemQuantityDcitionary.TryAdd(itemQuantity.Key, itemQuantity.Value))
+                if (!itemQuantityDictionary.TryAdd(itemQuantity.Key, itemQuantity.Value))
                 {
-                    itemQuantityDcitionary[itemQuantity.Key] += itemQuantity.Value;
+                    itemQuantityDictionary[itemQuantity.Key] += itemQuantity.Value;
                 }
             }
 
-
             //i think there is better way to iterate through the dictionary and products (join)
-            foreach (var itemQuantity in itemQuantityDcitionary)
+            foreach (var itemQuantity in itemQuantityDictionary)
             {
                 foreach (var product in Products)
                 {
@@ -95,37 +90,27 @@ Final Total: {newOrder.CalculateFinalTotal(CurrentCustomer)}
                 }
             }
 
-
-            Customer CurrentCustomer = Customers?.FirstOrDefault(c => c.Id == customerId);
-
-            //not need to nullity check, i already check it in the begin of the method CreateOrder
+            //what is the customer Id was not found? => in the begging of the method i check if customer exits or not
+            Customer CurrentCustomer = Customers.FirstOrDefault(c => c.Id == customerId);
+            
             decimal finalTotal = newOrder.CalculateFinalTotal(CurrentCustomer);
 
-
-            //there is a very better solution but i stuck here for a long time, i will comeback to it later
-            foreach (var item in newOrder.Items)
-            {
-                foreach (var product in Products)
-                {
-                    if (item.ProductId == product.Id)
-                    {
-                        product.ReduceStock(item.Quantity);
-                    }
-                }
-            }
-
-            /*
-             var innerJoin = employees.Join(
-                    departments,
-                    emp => emp.DepartmentId,
-                    dept => dept.Id,
-                    (emp, dept) => new { emp.Name, DeptName = dept.Name }
+            var matchedOrderItems = newOrder.Items.Join(
+                Products,
+                item => item.ProductId,
+                product => product.Id,
+                (item, product) => new { Item = item, Product = product }
                 );
-            */
+
+            foreach (var match in matchedOrderItems)
+            {
+                match.Product.ReduceStock(match.Item.Quantity);
+            }
 
             newOrder.CompleteOrder();
 
-            DisplayOrderInfo(CurrentCustomer, newOrder);//i moved it to a method to make the CreateOrder cleaner
+            DisplayOrderInfo(CurrentCustomer, newOrder);
+            //i moved it to a function to make the CreateOrder cleaner
         }
 
 
@@ -135,9 +120,8 @@ Final Total: {newOrder.CalculateFinalTotal(CurrentCustomer)}
 
             if (currentOrder == null || currentOrder.Status == OrderStatus.Cancelled)
             {
-                //just to save some time
-                Console.WriteLine("the order isn't exist or order already cancelled");
-                return;
+                //throw a new exception
+                //i should saperate the two conditions
             }
 
 
