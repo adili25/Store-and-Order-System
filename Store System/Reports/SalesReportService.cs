@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Threading.Tasks.Dataflow;
 
 namespace Store_System.Reports
 {
@@ -171,7 +172,7 @@ namespace Store_System.Reports
 
         public IEnumerable<(string productName, int quantitySold, decimal totalSales)> BestSellingProducts()
         {
-            var completedOrders = _orders.Any() ? _orders.Where(order => order.Status == OrderStatus.Completed) : return IEnumerable<(string productName, int quantitySold, decimal totalSales)>();
+            var completedOrders = _orders.Where(order => order.Status == OrderStatus.Completed);
 
             var ProductIdResult = completedOrders?.SelectMany(order => order.Items)
                                   .GroupBy(product => product.ProductId)
@@ -179,26 +180,85 @@ namespace Store_System.Reports
                                             productId: productGroup.Key,
                                             quantitySold: productGroup.Sum(order => order.Quantity),
                                             totalSales: productGroup.Sum(order => order.UnitPrice)
-                                           ))
-                                  .OrderByDescending(products => products.quantitySold)
-                                  .ThenByDescending(products => products.totalSales);
+                                           ));
             
             //nullable problem here
             return ProductIdResult.Join(
                 _products,
-                IdProduct => IdProduct.productId,
-                products => products.Name
-                (idProduct, product) => (
+                summary => summary.productId,
+                product => product.Id,
+                (summary, product) => (
                     productName: product.Name,
-                    quantitySold: idProduct.quantitySold,
-                    totalSales: idProduct.totalSales
-                )
-                );
+                    quantitySold: summary.quantitySold,
+                    totalSales: summary.totalSales
+                )).OrderByDescending(result => result.quantitySold)
+                  .ThenByDescending(result => result.totalSales);
+        }
+
+        public IEnumerable<Customer> CustomersWithNoOrders()
+        {
+            return _customers.GroupJoin(
+                _orders,
+                customer => customer.Id,
+                order => order.CustomerId,
+                (customer, orders) => new
+                {
+                    customer,
+                    orders
+                }
+                ).Where(result => !result.orders.Any())
+                 .Select(result => result.customer);
+            
+            
+            //.Any() solution
+            //return _customers.Where(customer => !_orders.Any(order => order.CustomerId == customer.Id));
+        }
+
+        public (string customerName, decimal subtotal, decimal discount, decimal finaltotal) MostValuableOrder()
+        {
+            var completedOrders = _orders.Where(order => order.Status == OrderStatus.Completed);
+
+            //join the customerId to return the whole customer object
+            return _customers.Join(
+                _orders,
+                customer => customer.Id,
+                order => order.CustomerId,
+                (customer, order) => (
+                    customerName: customer.FullName,
+                    subtotal: order.CalculateSubtotal(),
+                    finaltotal: order.CalculateFinalTotal(customer),
+                    discount: customer.GetDiscountPercentage()
+                )).OrderByDescending(result => result.finaltotal)
+                  .FirstOrDefault();
+        }
+
+        public record MonthlySalesSummary(int Year, int Month, int OrderCount, decimal TotalSales,decimal AverageOrderValue);
+
+        public IEnumerable<MonthlySalesSummary> GetMonthlySalesReport()
+        {
+            return _orders.Where(order => order.Status == OrderStatus.Completed)
+                          .Join(
+                               _customers,
+                               order => order.CustomerId,
+                               customer => customer.Id,
+                               (order, customer) => new { Order = order, Customer = customer }
+                            )
+                          .GroupBy(joinedData => new
+                           {
+                                Year = joinedData.Order.OrderDate.Year,
+                                Month = joinedData.Order.OrderDate.Month
+                           })
+                          .Select(group => new MonthlySalesSummary(
+                              group.Key.Year,
+                              group.Key.Month,
+                              group.Count(),
+                              group.Sum(joinedData => joinedData.Order.CalculateFinalTotal(joinedData.Customer)),
+                              group.Any() ? group.Average(joinedData => joinedData.Order.CalculateFinalTotal(joinedData.Customer)) : 0m
+                             ))
+                          .OrderBy(summary => summary.Year)
+                          .ThenBy(summary => summary.Month);
         }
 
 
-
-
-        
     }
 }
