@@ -36,77 +36,53 @@ Discount: {newOrder.CalculateFinalTotal(CurrentCustomer) - newOrder.CalculateSub
 Final Total: {newOrder.CalculateFinalTotal(CurrentCustomer)}
 ");
         }
-        public void AddCustomer(Customer customer) => Customers.Add(customer);
-        public void AddProduct(Product product) => Products.Add(product);
-        public void CreateOrder()
+        public void AddCustomer(string name, string email, CustomerType accountType)
         {
-            Console.WriteLine(@$"==========Create Order Form==========");
+            //add try-catch block
+            Customer newCustomer = new Customer(name, email, accountType);
 
-            Console.WriteLine("insert your Id: ");
+            Customers.Add(newCustomer);
+        }
 
-            string CustomerId = Console.ReadLine();
+
+        public void AddProduct(string name, string category, decimal price, int quantity)
+        {
+            //add try-catch block
+            Product newProduct = new Product(name, category, price, quantity);
+
+            Products.Add(newProduct);
+        }
+
+
+        public void CreateOrder(string customerId, Dictionary<string, int> itemQuantityDictionary)
+        {
+
 
             //should i throw an error, or "invalid Id" msg to the user?
-            if (string.IsNullOrWhiteSpace(CustomerId) || !Customers.Any(c => c.Id == CustomerId))
+            if (!Customers.Any(c => c.Id == customerId))
             {
-                Console.WriteLine("invalid Id, order canceled");
-                return;
+                //throw new exception
             }
 
-            Order newOrder = new Order(CustomerId);
+            Order newOrder = new Order(customerId);
 
             Orders.Add(newOrder);
 
-            //this is the best logic I imaged to handle the items and quantities insertion, and it can re-enter the same item multiple times 
-            Console.WriteLine("Enter the items in this form 'item1, quantity1' and press ENTER then 'item2, quantity' and press 0 to exit ");
-
-            Dictionary<string, int> DictionaryItems = new Dictionary<string, int>();// DictionaryItems <item, qunatity>
-
-            //the process of traslate the text into dictionary <item, quantity>
-            while (true)
-            {
-                Console.WriteLine("enter items and quantity:");
-
-                string UserInput = Console.ReadLine();
-
-                if (UserInput == "0") { break; }// for exit the loop
-
-                string[] saperatedInput = UserInput.Split(',');
-
-                saperatedInput.Select(input =>
-                {
-                    input.Trim();
-                    input.ToLower();
-                    return input;
-                });
-
-                string item = saperatedInput[0];
-
-                string quantity = saperatedInput[1];
-
-                if (!int.TryParse(quantity, out int intQuantity))
-                {
-                    Console.WriteLine("invalid quantity, re-enter the item, quantity:");
-                    continue;
-                }
-
-                DictionaryItems[item] = intQuantity;
-                // final shape of data, rawItemsData<string item, int quantity>
-            }
+            
 
             //merge the duplicate items
-            foreach (var itemQuantity in DictionaryItems)
+            foreach (var itemQuantity in itemQuantityDictionary)
             {
                 //TryAdd: it try to add the key if its not added, return true if its new, and false if its already included
-                if (!DictionaryItems.TryAdd(itemQuantity.Key, itemQuantity.Value))
+                if (!itemQuantityDcitionary.TryAdd(itemQuantity.Key, itemQuantity.Value))
                 {
-                    DictionaryItems[itemQuantity.Key] += itemQuantity.Value;
+                    itemQuantityDcitionary[itemQuantity.Key] += itemQuantity.Value;
                 }
             }
 
 
             //i think there is better way to iterate through the dictionary and products (join)
-            foreach (var itemQuantity in DictionaryItems)
+            foreach (var itemQuantity in itemQuantityDcitionary)
             {
                 foreach (var product in Products)
                 {
@@ -120,7 +96,7 @@ Final Total: {newOrder.CalculateFinalTotal(CurrentCustomer)}
             }
 
 
-            Customer CurrentCustomer = Customers.FirstOrDefault(c => c.Id == CustomerId);
+            Customer CurrentCustomer = Customers?.FirstOrDefault(c => c.Id == customerId);
 
             //not need to nullity check, i already check it in the begin of the method CreateOrder
             decimal finalTotal = newOrder.CalculateFinalTotal(CurrentCustomer);
