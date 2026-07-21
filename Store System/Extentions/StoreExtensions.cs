@@ -16,7 +16,7 @@ namespace Store_System.Extentions
                 throw new Exception("AMOUNT INVALID: NEGATIVE AMOUNT");
             }
 
-            if (!(discountPercentage > 0 && discountPercentage > 100))
+            if (discountPercentage < 0 || discountPercentage > 100)
             {
                 throw new Exception("DISCOUNT PERCENTAGE INVALID: MUST BE BETWEEN 100 AND 0");
             }
@@ -25,13 +25,22 @@ namespace Store_System.Extentions
         }
 
         public static IEnumerable<Product> AvailableOnly(this IEnumerable<Product> products) =>
-            products.Where(p => p.QuantityInStock > 0).AsEnumerable();
+            products.Where(p => p.QuantityInStock > 0);
 
         public static IEnumerable<Product> InCategory(this IEnumerable<Product> products, string category) =>
-            products.Where(p => p.Category == category).AsEnumerable();
+            products.Where(p => p.Category == category);
 
-        public static IEnumerable<Product> WithinPriceRange(this IEnumerable<Product> products,decimal minimumPrice,decimal maximumPrice) =>
-            products.Where(p => minimumPrice < p.Price && p.Price <maximumPrice).AsEnumerable();
+        public static IEnumerable<Product> WithinPriceRange(this IEnumerable<Product> products,decimal minimumPrice,decimal maximumPrice)
+        {
+            if (minimumPrice >= maximumPrice)
+            {
+                throw new Exception("INVALID MIN/MAX PRICE: MAX_PRICE MUST BE GREATER THAN MIN_PRICE");
+            }
+
+            return products.Where(p => minimumPrice < p.Price && p.Price < maximumPrice);
+
+            ;
+        }
 
         // there is OrderBy implemented in the StoreServices at the end of method chain (page 9)
     }

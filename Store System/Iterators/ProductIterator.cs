@@ -30,18 +30,18 @@ namespace Store_System.Iterators
                 yield break;
             }
 
-            products.OrderByDescending(p => p.Price);
+            var sortedProducts = products.OrderByDescending(p => p.Price);
 
             int returnCounter = 0;
 
-            foreach (var product in products)
+            foreach (var product in sortedProducts)
             {
-                if (returnCounter > maximumResults)
+                if (returnCounter == maximumResults)
                 {
                     yield break;
                 }
 
-                yield return product;
+                yield return product;  
 
                 returnCounter++;
             }

@@ -1,6 +1,8 @@
-﻿using System;
+﻿using Store_System.Iterators;
 using Store_System.Models;
+using Store_System.Reports;
 using Store_System.Services;
+using System;
 class Program
 {
 
@@ -22,7 +24,7 @@ class Program
 12. Demonstrate Iterators
 13. Exit
 Select an option:
-            ");
+");
     }
 
     static void Main()
@@ -254,26 +256,70 @@ Select an option:
                     
                     case 8:
                         //search Products
+                        Console.WriteLine("enter product name (or press enter for skip: ");
+
+                        string? inputSearchName = Console.ReadLine();
+
+                        Console.WriteLine("enter product category (or press enter for skip: ");
+
+                        string? inputSearchCategory = Console.ReadLine();
+
+                        Console.WriteLine("enter product min price (or press enter for skip: ");
+
+                        string? inputSearchMinPrice = Console.ReadLine();
+
+                        decimal.TryParse(inputSearchMinPrice, out decimal IntInputSearchMinPrice);
+
+                        SalesReportService report = new SalesReportService(service.GetProducts(), service.GetOrders(), service.GetCustomers());
+
+                        var filteredProducts = report.GetDynamicProductSearch(inputSearchName, inputSearchCategory, IntInputSearchMinPrice);
+                        //here the query is ready we just iterate through it and get the products
+
+                        foreach (var product in filteredProducts)
+                        {
+                            product.DisplayInfo();
+                        }
 
                         break;
 
                     case 9:
-                        //display slaes reports
+                        //display sales reports
+
                         
                         break;
 
                     case 10:
                         //demonstrate deferred execution
+                        service.DefferedAndImmediateExecution();
 
                         break;
-
+                            
                     case 11:
                         //demonstrate IEnumerable and IQuaryable
+                        service.IEnumerableAndIQueryable();
 
                         break;
 
                     case 12:
                         //demonstrate Iterators
+
+                        var allProducts = service.GetProducts();
+
+                        var lowStockProducts = ProductIterator.GetLowStockProducts(allProducts, 5);
+
+                        foreach (var product in lowStockProducts)
+                        {
+                            // this loop will fetch products one by one
+                            Console.WriteLine($"- {product.Name} | Stock: {product.QuantityInStock}");
+                        }
+
+
+                        var topExpensiveProducts = ProductIterator.GetTopExpensiveProducts(allProducts, 3);
+
+                        foreach (var product in topExpensiveProducts)
+                        {
+                            Console.WriteLine($"- {product.Name} | Price: {product.Price} JOD");
+                        }
 
                         break;
 

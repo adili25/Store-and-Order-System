@@ -22,28 +22,28 @@ namespace Store_System.Reports
         }
 
 
-        public IEnumerable<Product> GetDynamicProductSearch(string name = null, string category = null, decimal? minPrice = null)
+        public IEnumerable<Product> GetDynamicProductSearch(string? name = null, string? category = null, decimal? minPrice = null)
         {
-            IEnumerable<Product> query = _products;
+            IEnumerable<Product> filteredProducts = _products;
 
             if (!string.IsNullOrEmpty(name))
             {
-                query = query.Where(p => p.Name == name);
+                filteredProducts = filteredProducts.Where(p => p.Name == name);
             }
 
             if (!string.IsNullOrEmpty(category))
             {
-                query = query.Where(p => p.Category == category);
+                filteredProducts = filteredProducts.Where(p => p.Category == category);
             }
 
             if (!(minPrice == null))
             {
-                query = query.Where(p => p.Price >= minPrice);
+                filteredProducts = filteredProducts.Where(p => p.Price >= minPrice);
             }
 
-            query = query.Where(p => p.QuantityInStock > 0);
+            filteredProducts = filteredProducts.Where(p => p.QuantityInStock > 0);
 
-            return query;
+            return filteredProducts;
         }
 
         public IEnumerable<(string Name, string Category, decimal Price, StockStatus stockStatus)> GetProductProjection()
