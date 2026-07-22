@@ -22,6 +22,7 @@ namespace Store_System.Reports
         }
 
 
+        //challenge 1 
         public IEnumerable<Product> GetDynamicProductSearch(string? name = null, string? category = null, decimal? minPrice = null)
         {
             IEnumerable<Product> filteredProducts = _products;
@@ -45,7 +46,8 @@ namespace Store_System.Reports
 
             return filteredProducts;
         }
-
+        
+        //challenge 2
         public IEnumerable<(string Name, string Category, decimal Price, StockStatus stockStatus)> GetProductProjection()
         {
             //in this solution no need to build a whole new struct or class
@@ -72,6 +74,7 @@ namespace Store_System.Reports
             //return result;
         }
 
+        //challenge 3
         public IEnumerable<(string CategoryName, int ProductCount, int TotalUnits, decimal AveragePrice, string MostExpensive, string LeastExpensive)>CagtegoryStatistics()
         {
             return _products.GroupBy(p => p.Category)
@@ -85,6 +88,8 @@ namespace Store_System.Reports
                                 ));
         }
         
+
+        //challenge 4
         public IEnumerable<(string OrderId, string CustomerName, CustomerType CustomreType, DateTime OrderDate, OrderStatus OrderStatus, decimal OrderTotal)> GetCustomerOrderReport()
         {
             var CustomerOrderJoin = _orders.Join(
@@ -103,12 +108,14 @@ namespace Store_System.Reports
             return CustomerOrderJoin;
         }
 
+
+        //challenge 5
         public IEnumerable<OrderDetailReportDto> GetOrderDetailReport()
         {
-            // 1. Flatten the Orders and OrderItems into an intermediate anonymous type (or Tuple)
+            // 1. flatten the Orders and OrderItems into an tuple
             var flattenedOrderItems = _orders.SelectMany(
-                order => order.Items, // The collection to flatten
-                (order, item) => new       // The projection that keeps the parent data
+                order => order.Items,
+                (order, item) => new 
                 {
                     OrderId = order.Id,
                     CustomerId = order.CustomerId,
@@ -117,11 +124,11 @@ namespace Store_System.Reports
                 }
             );
 
-            // 2. Join the flattened list with the Products list to get the names and prices
+            // 2.join the flattened list with the Products list to get the names and prices
             var detailedReport = flattenedOrderItems.Join(
                 _products,
-                flatItem => flatItem.ProductId, // Outer key
-                product => product.Id,          // Inner key
+                flatItem => flatItem.ProductId,
+                product => product.Id,      
                 (flatItem, product) => new OrderDetailReportDto
                 {
                     CustomerId = flatItem.CustomerId,
@@ -136,6 +143,7 @@ namespace Store_System.Reports
             return detailedReport;
         }
 
+        //challenge 6
         public decimal CalculateTotalCompletedSales()
         {
             return _orders.Where(o => o.Status == OrderStatus.Completed)
@@ -143,6 +151,7 @@ namespace Store_System.Reports
                    .Aggregate(0m, (curr, next) => curr + next);
         }
 
+        //challenge 7
         public string OrderItemTextSummary()
         {
             return _products.Aggregate("", (currText, nextItem) =>
@@ -153,6 +162,7 @@ namespace Store_System.Reports
 
         //check about making the IEnumerable<(string customerName, ....)> to IEnumerable<record>
         //check about using yield return for all these reportes
+        //challenge 8
         public IEnumerable<(string customerName, int completedOrdersCount, decimal totalSpend, decimal avgOrderValue)> CustomersRankedBySpending()
         {
             var completedOrders = _orders.Where(order => order.Status == OrderStatus.Completed);
@@ -170,6 +180,7 @@ namespace Store_System.Reports
                 )).OrderByDescending(summary => summary.totalSpend);
         }
 
+        //challenge 9
         public IEnumerable<(string productName, int quantitySold, decimal totalSales)> BestSellingProducts()
         {
             var completedOrders = _orders.Where(order => order.Status == OrderStatus.Completed);
@@ -195,6 +206,7 @@ namespace Store_System.Reports
                   .ThenByDescending(result => result.totalSales);
         }
 
+        //challenge 10
         public IEnumerable<Customer> CustomersWithNoOrders()
         {
             return _customers.GroupJoin(
@@ -214,6 +226,7 @@ namespace Store_System.Reports
             //return _customers.Where(customer => !_orders.Any(order => order.CustomerId == customer.Id));
         }
 
+        //challenge 11
         public (string customerName, decimal subtotal, decimal discount, decimal finaltotal) MostValuableOrder()
         {
             var completedOrders = _orders.Where(order => order.Status == OrderStatus.Completed);
@@ -232,8 +245,9 @@ namespace Store_System.Reports
                   .FirstOrDefault();
         }
 
-        public record MonthlySalesSummary(int Year, int Month, int OrderCount, decimal TotalSales,decimal AverageOrderValue);
 
+        //challenge 12
+        public record MonthlySalesSummary(int Year, int Month, int OrderCount, decimal TotalSales,decimal AverageOrderValue);//acts as class prop
         public IEnumerable<MonthlySalesSummary> GetMonthlySalesReport()
         {
             return _orders.Where(order => order.Status == OrderStatus.Completed)
