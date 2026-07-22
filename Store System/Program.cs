@@ -274,101 +274,179 @@ Select an option:
 
                         var filteredProducts = ProductSearchReport.GetDynamicProductSearch(inputSearchName, inputSearchCategory, IntInputSearchMinPrice);
                         //here the query is ready we just iterate through it and get the products
-
-                        foreach (var product in filteredProducts)
+                        if (filteredProducts != default)
                         {
-                            product.DisplayInfo();
+                            Console.WriteLine("no Products to filter");
                         }
 
+                        else
+                        {
+                            foreach (var product in filteredProducts)
+                            {
+                                product.DisplayInfo();
+                            }
+                        }
                         break;
 
                     case 9:
                         //display sales reports
-                        // 1. Instantiate the report service using your central data source
                         var reportService = new SalesReportService(
                             service.GetProducts(),
                             service.GetOrders(),
                             service.GetCustomers()
                         );
 
-                        // --- Challenge 2: Product Projection ---
-                        Console.WriteLine("\n[ Product Projection ]");
-                        foreach (var p in reportService.GetProductProjection())
+                        //challenge 2: Product Projection
+                        Console.WriteLine("[ Product Projection ]");
+                        var ProductProjection = reportService.GetProductProjection();
+                        if (!ProductProjection.Any())
                         {
-                            Console.WriteLine($"- {p.Name} ({p.Category}) | {p.Price} JOD | Status: {p.stockStatus}");
+                            Console.WriteLine("No Products in the system");
+                        }
+                        else
+                        {
+                            foreach (var p in reportService.GetProductProjection())
+                            {
+                                Console.WriteLine($"- {p.Name} ({p.Category}) | {p.Price} JOD | Status: {p.stockStatus}");
+                            }
                         }
 
-                        // --- Challenge 3: Category Statistics ---
-                        Console.WriteLine("\n[ Category Statistics ]");
-                        foreach (var stat in reportService.CagtegoryStatistics())
+                        //challenge 3: Category Statistics
+                        Console.WriteLine("[ Category Statistics ]");
+                        var CagtegoryStatictics = reportService.CagtegoryStatistics();
+
+                        if (!CagtegoryStatictics.Any())
                         {
-                            Console.WriteLine($"- {stat.CategoryName}: {stat.ProductCount} products, {stat.TotalUnits} units available, Avg Price: {stat.AveragePrice:F2} JOD. (Most Exp: {stat.MostExpensive}, Least Exp: {stat.LeastExpensive})");
+                            Console.WriteLine("no Products in the system");
+                        }
+                        else
+                        { 
+                            foreach (var stat in CagtegoryStatictics)
+                            {
+                                Console.WriteLine($"- {stat.CategoryName}: {stat.ProductCount} products, {stat.TotalUnits} units available, Avg Price: {stat.AveragePrice:F2} JOD. (Most Exp: {stat.MostExpensive}, Least Exp: {stat.LeastExpensive})");
+                            }
                         }
 
-                        // --- Challenge 4: Customer Order Report ---
-                        Console.WriteLine("\n[ Customer Order Report ]");
-                        foreach (var report in reportService.GetCustomerOrderReport())
+                        //challenge 4: Customer Order Report
+                        Console.WriteLine("[ Customer Order Report ]");
+                        var CustomerOrderRreport = reportService.GetCustomerOrderReport();
+                        if (!CustomerOrderRreport.Any())
                         {
-                            Console.WriteLine($"- Order {report.OrderId} | {report.CustomerName} ({report.CustomreType}) | {report.OrderDate:yyyy-MM-dd} | Status: {report.OrderStatus} | Total: {report.OrderTotal} JOD");
+                            Console.WriteLine("No Orders/Customers in the system");
+                        }
+                        else
+                        {
+                            foreach (var report in CustomerOrderRreport)
+                            {
+                                Console.WriteLine($"- Order {report.OrderId} | {report.CustomerName} ({report.CustomerType}) | {report.OrderDate:yyyy-MM-dd} | Status: {report.OrderStatus} | Total: {report.OrderTotal} JOD");
+                            }
                         }
 
-                        // --- Challenge 5: Order Detail Report ---
-                        Console.WriteLine("\n[ Order Detail Report ]");
-                        foreach (var detail in reportService.GetOrderDetailReport())
+                        //challenge 5: Order Detail Report
+                        Console.WriteLine("[ Order Detail Report ]");
+                        var OrderDetailReport = reportService.GetOrderDetailReport();
+                        if (!OrderDetailReport.Any())
                         {
-                            Console.WriteLine($"- Order {detail.OrderId} (Customer {detail.CustomerId}) | {detail.ProductName} x{detail.Quantity} | Unit: {detail.UnitPrice} JOD | Total: {detail.TotalPrice} JOD");
+                            Console.WriteLine("No Orders/Products in the System");
+                        }
+                        else {
+                            foreach (var detail in OrderDetailReport)
+                            {
+                                Console.WriteLine($"- Order {detail.OrderId} (Customer {detail.CustomerId}) | {detail.ProductName} x{detail.Quantity} | Unit: {detail.UnitPrice} JOD | Total: {detail.TotalPrice} JOD");
+                            }
                         }
 
-                        // --- Challenge 6 & 7: Aggregates ---
-                        Console.WriteLine("\n[ Aggregated Summaries ]");
-                        Console.WriteLine($"Total Completed Sales Revenue: {reportService.CalculateTotalCompletedSales()} JOD");
-                        Console.WriteLine($"Inventory Summary: {reportService.OrderItemTextSummary()}");
+                        // challenge 6 & 7: Aggregates
+                        Console.WriteLine("[ Aggregated Summaries ]");
+                        decimal? TotalCompletedSales = reportService.CalculateTotalCompletedSales();
+                        if (TotalCompletedSales != default)
+                        {
+                            Console.WriteLine($"Total Completed Sales Revenue: {TotalCompletedSales} JOD");
+                        }
+                        Console.WriteLine("No Completed Orders");
 
-                        // --- Challenge 8: Customers Ranked by Spending ---
-                        Console.WriteLine("\n[ CUSTOMERS RANKED BY SPENDING ]");
+                        string? OrderItemSummary = reportService.OrderItemTextSummary();
+                        if (OrderItemSummary != default)
+                        {
+                            Console.WriteLine($"Inventory Summary: {OrderItemSummary}");
+                        }
+                        Console.WriteLine("No Completed Orders");
+
+                        // challenge 8: Customers Ranked by Spending
+                        Console.WriteLine("[ CUSTOMERS RANKED BY SPENDING ]");
                         var rankedCustomers = reportService.CustomersRankedBySpending();
-                        int rank = 1;
-                        foreach (var c in rankedCustomers)
+                        if (!rankedCustomers.Any())
                         {
-                            Console.WriteLine($"{rank}. {c.customerName} | Orders: {c.completedOrdersCount} | Total: {c.totalSpend:F2} JOD | Average: {c.avgOrderValue:F2} JOD");
-                            rank++;
+                            Console.WriteLine("no Completed Orders");
+                        }
+                        else
+                        {
+                            int rank = 1;
+                            foreach (var c in rankedCustomers)
+                            {
+                                Console.WriteLine($"{rank}. {c.CustomerName} | Orders: {c.CompletedOrdersCount} | Total: {c.TotalSpend:F2} JOD | Average: {c.AvgOrderValue:F2} JOD");
+                                rank++;
+                            }
                         }
 
-                        // --- Challenge 9: Best Selling Products ---
+                        //challenge 9: Best Selling Products
                         Console.WriteLine("\n[ Best Selling Products ]");
                         var bestSellers = reportService.BestSellingProducts();
-                        if (!bestSellers.Any()) Console.WriteLine("No completed sales data available.");
-                        foreach (var bs in bestSellers)
+                        if (!bestSellers.Any())
                         {
-                            Console.WriteLine($"- {bs.productName} | Units Sold: {bs.quantitySold} | Total Revenue: {bs.totalSales:F2} JOD");
+                            Console.WriteLine("No completed sales data available.");
+                        }
+                        else
+                        {
+                            foreach (var bs in bestSellers)
+                            {
+                                Console.WriteLine($"- {bs.ProductName} | Units Sold: {bs.QuantitySold} | Total Revenue: {bs.TotalSales:F2} JOD");
+                            }
                         }
 
-                        // --- Challenge 10: Customers With No Orders ---
+                        //challenge 10: Customers With No Orders
                         Console.WriteLine("\n[ Customers With No Orders ]");
                         var inactiveCustomers = reportService.CustomersWithNoOrders();
-                        if (!inactiveCustomers.Any()) Console.WriteLine("All customers have placed at least one order.");
-                        foreach (var customer in inactiveCustomers)
+                        if (!inactiveCustomers.Any())
                         {
-                            Console.WriteLine($"- {customer.FullName} ({customer.Email})");
+                            Console.WriteLine("All customers have placed at least one order.");
+                        }
+                        else
+                        {
+                            foreach (var customer in inactiveCustomers)
+                            {
+                                Console.WriteLine($"- {customer.FullName} ({customer.Email})");
+                            }
                         }
 
-                        // --- Challenge 11: Most Valuable Order ---
+                        //challenge 11: Most Valuable Order
                         Console.WriteLine("\n[ Most Valuable Order ]");
                         var topOrder = reportService.MostValuableOrder();
-                        if (topOrder != default)
+                        //default is the default value for what ever the type is (class => null, number=>0, bool=>false)
+                        if (topOrder == default)
                         {
-                            Console.WriteLine($"- Customer: {topOrder.customerName}");
-                            Console.WriteLine($"- Subtotal: {topOrder.subtotal:F2} JOD | Discount: {topOrder.discount}% | Final Total: {topOrder.finaltotal:F2} JOD");
+                            Console.WriteLine("no Orders/Customers in the system");
+                        }
+                        else
+                        {
+                            Console.WriteLine($"- Customer: {topOrder.CustomerName}");
+                            Console.WriteLine($"- Subtotal: {topOrder.Subtotal:F2} JOD | Discount: {topOrder.Discount}% | Final Total: {topOrder.FinalTotal:F2} JOD");
                         }
 
-                        // --- Challenge 12: Monthly Sales Report ---
+                        //challenge 12: Monthly Sales Report
                         Console.WriteLine("\n[ MONTHLY SALES ]");
                         var monthlySales = reportService.GetMonthlySalesReport();
-                        if (!monthlySales.Any()) Console.WriteLine("No completed sales data available.");
-                        foreach (var month in monthlySales)
+                        if (!monthlySales.Any())
                         {
-                            // Formatting strictly to match the required training document output[cite: 1]
-                            Console.WriteLine($"{month.Year}-{month.Month:D2} | Orders: {month.OrderCount} | Total: {month.TotalSales:F2} JOD | Average: {month.AverageOrderValue:F2} JOD");
+                            Console.WriteLine("No completed sales data available.");
+                        }
+                        else
+                        {
+                            foreach (var month in monthlySales)
+                            {
+                                //formatting to match the requirements
+                                Console.WriteLine($"{month.Year}-{month.Month:D2} | Orders: {month.OrderCount} | Total: {month.TotalSales:F2} JOD | Average: {month.AverageOrderValue:F2} JOD");
+                            }
                         }
 
                         Console.WriteLine("\n================================================");
