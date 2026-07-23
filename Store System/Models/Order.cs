@@ -13,7 +13,20 @@ namespace Store_System.Models
         public OrderStatus Status { get; private set; }
 
         //build display info for the order class (case 7 in the main)
-
+        public void DisplayInfo()
+        {
+            Console.WriteLine(@$"
+Id: {Id}
+Order date and time: {OrderDate.ToString("dd/MM/yyyy HH:mm")}
+CustomerId: {CustomerId}
+Order status: {Status}
+Items:
+");
+            foreach(var item in Items)
+            {
+                item.DisplayInfo();
+            }
+        }
 
         public void AddItem(OrderItem item)
         {
@@ -26,7 +39,7 @@ namespace Store_System.Models
             Items.Add(item);
         }
 
-        public decimal CalculateSubtotal() => Items.Sum(item => item.UnitPrice);
+        public decimal CalculateSubtotal() => Items.Sum(item => item.TotalPrice);
 
         public decimal CalculateFinalTotal(Customer customer)
         {

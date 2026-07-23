@@ -8,9 +8,8 @@ namespace Store_System.Reports
 {
     //here i will build a record for each report to make the class cleaner without these IEnumerable<(string ...)> return types
     public record ProductProjection(string Name, string Category, decimal Price, StockStatus stockStatus);
-    
+    public enum StockStatus{ OutOfStock, Available };
     public record MonthlySalesSummary(int Year, int Month, int OrderCount, decimal TotalSales, decimal AverageOrderValue);
-    
     public record CategoryStatisticsSummary(string CategoryName, int ProductCount, int TotalUnits, decimal AveragePrice, string MostExpensive, string LeastExpensive);
 
     public record CustomerOrderReportSummary(string OrderId, string CustomerName, CustomerType CustomerType, DateTime OrderDate, OrderStatus OrderStatus, decimal OrderTotal);
@@ -21,6 +20,7 @@ namespace Store_System.Reports
 
     public record MostValuableOrderSummary(string CustomerName, decimal Subtotal, decimal Discount, decimal FinalTotal);
 
+    public record OrderDetailReportDto(string CustomerId, string OrderId, string ProductName, int Quantity, decimal UnitPrice, decimal TotalPrice);
 
     internal class SalesReportService
     {
@@ -147,14 +147,14 @@ namespace Store_System.Reports
                 flatItem => flatItem.ProductId,
                 product => product.Id,      
                 (flatItem, product) => new OrderDetailReportDto
-                {
-                    CustomerId = flatItem.CustomerId,
-                    OrderId = flatItem.OrderId,
-                    ProductName = product.Name,
-                    Quantity = flatItem.Quantity,
-                    UnitPrice = product.Price,
-                    TotalPrice = flatItem.Quantity * product.Price
-                }
+                (
+                    CustomerId: flatItem.CustomerId,
+                    OrderId: flatItem.OrderId,
+                    ProductName: product.Name,
+                    Quantity: flatItem.Quantity,
+                    UnitPrice: product.Price,
+                    TotalPrice: flatItem.Quantity * product.Price
+                )
             );
         }
 
@@ -200,7 +200,7 @@ namespace Store_System.Reports
         {
             var completedOrders = _orders.Where(order => order.Status == OrderStatus.Completed);
 
-            var ProductIdResult = completedOrders?.SelectMany(order => order.Items)
+            var ProductIdResult = completedOrders.SelectMany(order => order.Items)
                                   .GroupBy(product => product.ProductId)
                                   .Select(productGroup => (
                                             productId: productGroup.Key,

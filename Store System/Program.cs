@@ -201,6 +201,7 @@ Select an option:
 
                             DictionaryItems[item] = intQuantity;
                             // final shape of data, rawItemsData<string item, int quantity>
+                            Console.WriteLine(item, intQuantity);
                         }
 
                         service.CreateOrder(inputCustomerId, DictionaryItems);
@@ -250,7 +251,7 @@ Select an option:
 
                         foreach (var order in orders)
                         {
-                            //order.DisplayInfo();
+                            order.DisplayInfo();
                         }
                         break;
                     
@@ -274,7 +275,7 @@ Select an option:
 
                         var filteredProducts = ProductSearchReport.GetDynamicProductSearch(inputSearchName, inputSearchCategory, IntInputSearchMinPrice);
                         //here the query is ready we just iterate through it and get the products
-                        if (filteredProducts != default)
+                        if (filteredProducts == default)
                         {
                             Console.WriteLine("no Products to filter");
                         }
@@ -363,15 +364,19 @@ Select an option:
                         {
                             Console.WriteLine($"Total Completed Sales Revenue: {TotalCompletedSales} JOD");
                         }
-                        Console.WriteLine("No Completed Orders");
-
+                        else
+                        {
+                            Console.WriteLine("No Completed Orders");
+                        }
                         string? OrderItemSummary = reportService.OrderItemTextSummary();
                         if (OrderItemSummary != default)
                         {
                             Console.WriteLine($"Inventory Summary: {OrderItemSummary}");
                         }
-                        Console.WriteLine("No Completed Orders");
-
+                        else
+                        {
+                            Console.WriteLine("No Completed Orders");
+                        }
                         // challenge 8: Customers Ranked by Spending
                         Console.WriteLine("[ CUSTOMERS RANKED BY SPENDING ]");
                         var rankedCustomers = reportService.CustomersRankedBySpending();
@@ -433,7 +438,7 @@ Select an option:
                             Console.WriteLine($"- Subtotal: {topOrder.Subtotal:F2} JOD | Discount: {topOrder.Discount}% | Final Total: {topOrder.FinalTotal:F2} JOD");
                         }
 
-                        //challenge 12: Monthly Sales Report
+                        // challenge 12: Monthly Sales Report
                         Console.WriteLine("\n[ MONTHLY SALES ]");
                         var monthlySales = reportService.GetMonthlySalesReport();
                         if (!monthlySales.Any())
@@ -456,12 +461,25 @@ Select an option:
                     case 10:
                         //demonstrate deferred execution
                         service.DefferedAndImmediateExecution();
-
+                        Console.WriteLine("See The Implementation Inside The Method");
                         break;
                             
                     case 11:
                         //demonstrate IEnumerable and IQuaryable
-                        service.IEnumerableAndIQueryable();
+                        var query = service.IEnumerableAndIQueryable();
+                        if (query == null)
+                        {
+                            Console.WriteLine("No Orders With Price Above 100");
+                            return;
+                        }
+                        else
+                        {
+                            Console.WriteLine("=============Orders Above 100===========");
+                            foreach (var product in query)
+                            {
+                                product.DisplayInfo();
+                            }
+                        }
 
                         break;
 

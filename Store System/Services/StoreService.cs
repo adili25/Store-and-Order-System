@@ -7,9 +7,9 @@ namespace Store_System.Services
 {
     internal class StoreService
     {
-        private readonly List<Customer> Customers = new List<Customer>();
-        private readonly List<Product> Products = new List<Product>();
-        private readonly List<Order> Orders = new List<Order>();
+        private readonly List<Customer> Customers = [];
+        private readonly List<Product> Products = [];
+        private readonly List<Order> Orders = [];
 
         //should i keep it as it is, or pass the ID validate the customer/product here in these methods?
 
@@ -32,7 +32,7 @@ Items:
 $"{nameQuantity.productName} x {nameQuantity.itemQuantity} = {nameQuantity.itemQuantity * nameQuantity.price}"))}
 
 Subtotal: {newOrder.CalculateSubtotal()}
-Discount: {newOrder.CalculateFinalTotal(CurrentCustomer) - newOrder.CalculateSubtotal()}
+Discount: {CurrentCustomer.GetDiscountPercentage() * newOrder.CalculateSubtotal()}
 Final Total: {newOrder.CalculateFinalTotal(CurrentCustomer)}
 ");
         }
@@ -49,16 +49,24 @@ Final Total: {newOrder.CalculateFinalTotal(CurrentCustomer)}
         {
             //add try-catch block
             Product newProduct = new Product(name, category, price, quantity);
-
             Products.Add(newProduct);
         }
 
 
         public void CreateOrder(string customerId, Dictionary<string, int> itemQuantityDictionary)
         {
-            if (!Customers.Any(c => c.Id == customerId))
+            //test purposes
+            //foreach (var item in itemQuantityDictionary)
+            //{
+            //    Console.WriteLine($"test (the beginning of CreateOrder): {item.Key}, {item.Value}");
+            //}
+
+            Customer? CurrentCustomer = Customers.FirstOrDefault(c => c.Id == customerId);
+
+            if (CurrentCustomer == null)
             {
                 //throw new exception
+                throw new Exception("adsfasf");
             }
 
             //add try-catch block
@@ -66,15 +74,18 @@ Final Total: {newOrder.CalculateFinalTotal(CurrentCustomer)}
 
             Orders.Add(newOrder);
 
-            //merge the duplicate items
+
+            //merge the duplicate items (there is a problem here the dictionary itself doesnot allow duplicates so the problem is the actual handling of data) 
+            Dictionary<string, int> container = new Dictionary<string, int>();
             foreach (var itemQuantity in itemQuantityDictionary)
             {
                 //TryAdd: it try to add the key if its not added, return true if its new, and false if its already included
-                if (!itemQuantityDictionary.TryAdd(itemQuantity.Key, itemQuantity.Value))
+                if (!container.TryAdd(itemQuantity.Key, itemQuantity.Value))
                 {
-                    itemQuantityDictionary[itemQuantity.Key] += itemQuantity.Value;
+                    container[itemQuantity.Key] += itemQuantity.Value;
                 }
             }
+            itemQuantityDictionary = container;
 
             //i think there is better way to iterate through the dictionary and products (join)
             foreach (var itemQuantity in itemQuantityDictionary)
@@ -89,9 +100,6 @@ Final Total: {newOrder.CalculateFinalTotal(CurrentCustomer)}
                     }
                 }
             }
-
-            //what is the customer Id was not found? => in the begging of the method i check if customer exits or not
-            Customer CurrentCustomer = Customers.FirstOrDefault(c => c.Id == customerId);
             
             decimal finalTotal = newOrder.CalculateFinalTotal(CurrentCustomer);
 
@@ -106,6 +114,8 @@ Final Total: {newOrder.CalculateFinalTotal(CurrentCustomer)}
             {
                 match.Product.ReduceStock(match.Item.Quantity);
             }
+
+            //Console.WriteLine($"test: quantity{newOrder.Items.FirstOrDefault().Quantity}, itemId:{newOrder.Items[0].ProductId}");
 
             newOrder.CompleteOrder();
 
@@ -122,6 +132,7 @@ Final Total: {newOrder.CalculateFinalTotal(CurrentCustomer)}
             {
                 //throw a new exception
                 //i should saperate the two conditions
+                throw new Exception("no order with that Id/ order status cancelled");
             }
 
 
@@ -194,11 +205,11 @@ Final Total: {newOrder.CalculateFinalTotal(CurrentCustomer)}
              */
 
 
-        public void IEnumerableAndIQueryable()
+        public IQueryable<Product> IEnumerableAndIQueryable()
         {
             IQueryable<Product> queryableProducts = Products.AsQueryable();
 
-            var query = queryableProducts.Where(product => product.Price > 100);
+            return queryableProducts.Where(product => product.Price >= 100);
         }
         /*
         * limitations:

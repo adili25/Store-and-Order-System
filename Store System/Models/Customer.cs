@@ -31,6 +31,6 @@ Registration Date: {this.RegistrationDate.ToString("yyyy-MM-dd HH:mm:ss")}
 ");
         }
 
-        public decimal GetDiscountPercentage() => this.CustomerType == CustomerType.Regular ? 0 : 10;
+        public decimal GetDiscountPercentage() => this.CustomerType == CustomerType.Regular ? 0m : 0.10m;
     }
 }
