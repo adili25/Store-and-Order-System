@@ -227,9 +227,33 @@ Final Total: {newOrder.CalculateFinalTotal(CurrentCustomer)}
         */
 
 
-        public IEnumerable<Customer> GetCustomers() => Customers.AsEnumerable();
-        public IEnumerable<Product> GetProducts() => Products.AsEnumerable();
-        public IEnumerable<Order> GetOrders() => Orders.AsEnumerable();
+        public IEnumerable<Customer> GetCustomers()
+        {
+            if (!Customers.Any())
+            {
+                throw new Exception("CAN'T GET CUSTOMERS: THERE IS NO CUSTOMERS IN THE SYSTEM");
+            }
+
+            return Customers.AsEnumerable();
+        }
+        public IEnumerable<Product> GetProducts()
+        {
+            if (!Products.Any())
+            {
+                throw new Exception("CAN'T GET PRODUCTS: THERE IS NO PRODUCTS IN THE SYSTEM");
+            }
+
+            return Products.AsEnumerable();
+        }
+        public IEnumerable<Order> GetOrders()
+        {
+            if (!Orders.Any())
+            {
+                throw new Exception("CAN'T GET ORDERS: THERE IS NO ORDERS IN THE SYSTEM");
+            }
+
+            return Orders.AsEnumerable();
+        }
 
 
     }

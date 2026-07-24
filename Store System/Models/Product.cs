@@ -61,7 +61,7 @@ Quantity in stock: {this.QuantityInStock}
 
             if (string.IsNullOrWhiteSpace(category))
             {
-                throw new ArgumentException("INVALID CATEGORY: IS_NULL_OR_EMPTY VALIDATION FAILED", nameof(category);
+                throw new ArgumentException("INVALID CATEGORY: IS_NULL_OR_EMPTY VALIDATION FAILED", nameof(category));
             }
 
             Category = category;

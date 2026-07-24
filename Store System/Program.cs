@@ -49,7 +49,6 @@ Select an option:
 
                         string? inputCustomerName = Console.ReadLine();
 
-                        //i already validate all the user input in the class constructors, by throwing a new error
                         if (string.IsNullOrWhiteSpace(inputCustomerName))
                         {
                             Console.WriteLine("invalid name: is_null_or_whitespaces");
@@ -93,9 +92,16 @@ Select an option:
                             Console.WriteLine("invalid account type: must be either 'p' or 'r'");
                             continue;
                         }
-
-                        service.AddCustomer(inputCustomerName, inputEmail, type);
-
+                        try
+                        {
+                            service.AddCustomer(inputCustomerName, inputEmail, type);
+                            Console.WriteLine("Customer successfully added");
+                        }
+                        catch (Exception ex)
+                        {
+                            Console.WriteLine(ex.Message);
+                            continue;
+                        }
                         break;
 
                     case 2:
@@ -136,13 +142,20 @@ Select an option:
 
                         if (string.IsNullOrWhiteSpace(inputProductQuantity) || !int.TryParse(inputProductQuantity, out int intProductQuantity) || intProductQuantity < 0)
                         {
-
                             //i should use saperatezd conditions to show the user there is his problem
                             Console.WriteLine("invalid price: should be not null and a number and more than or equal to zero");
                             continue;
                         }
 
-                        service.AddProduct(inputProductName, inputProductCategory, intProductPrice, intProductQuantity);
+                        try
+                        {
+                            service.AddProduct(inputProductName, inputProductCategory, intProductPrice, intProductQuantity);
+                            Console.WriteLine("Products successfully added");
+                        }
+                        catch (Exception ex)
+                        {
+                            Console.WriteLine(ex.Message);
+                        }
                         break;
 
                     case 3:
@@ -201,10 +214,16 @@ Select an option:
 
                             DictionaryItems[item] = intQuantity;
                             // final shape of data, rawItemsData<string item, int quantity>
-                            Console.WriteLine(item, intQuantity);
                         }
 
-                        service.CreateOrder(inputCustomerId, DictionaryItems);
+                        try
+                        {
+                            service.CreateOrder(inputCustomerId, DictionaryItems);
+                        }
+                        catch (Exception ex)
+                        {
+                            Console.WriteLine(ex.Message);
+                        }
 
                         break;
 
@@ -219,13 +238,30 @@ Select an option:
                             Console.WriteLine("invalid order id: is_null_or_whitespace");
                             continue;
                         }
-
-                        service.CancelOrder(inputOrderId);
+                        try
+                        {
+                            service.CancelOrder(inputOrderId);
+                            Console.WriteLine("Order cancelled successfully");
+                        }
+                        catch (Exception ex)
+                        {
+                            Console.WriteLine(ex.Message);
+                        }
                         break;
 
                     case 5:
                         //dispaly customers
-                        IEnumerable<Customer> customers = service.GetCustomers();
+                        IEnumerable<Customer> customers = [];
+
+                        try
+                        {
+                            customers = service.GetCustomers();
+                        }
+                        catch (Exception ex)
+                        {
+                            Console.WriteLine(ex.Message);
+                            continue;
+                        }
 
                         foreach (var customer in customers)
                         {
@@ -236,7 +272,17 @@ Select an option:
 
                     case 6:
                         //display products
-                        IEnumerable<Product> products = service.GetProducts();
+                        IEnumerable<Product> products = [];
+
+                        try
+                        {
+                            products = service.GetProducts();
+                        }
+                        catch (Exception ex)
+                        {
+                            Console.WriteLine(ex.Message);
+                            continue;
+                        }
 
                         foreach (var product in products)
                         {
@@ -247,7 +293,17 @@ Select an option:
 
                     case 7:
                         //display orders
-                        IEnumerable<Order> orders = service.GetOrders();
+                        IEnumerable<Order> orders = [];
+
+                        try
+                        {
+                            orders = service.GetOrders();
+                        }
+                        catch (Exception ex)
+                        {
+                            Console.WriteLine(ex.Message);
+                            continue;
+                        }
 
                         foreach (var order in orders)
                         {
@@ -257,23 +313,41 @@ Select an option:
                     
                     case 8:
                         //search Products
-                        Console.WriteLine("enter product name (or press enter for skip: ");
-
+                        Console.WriteLine("enter product name (or press enter for skip): ");
                         string? inputSearchName = Console.ReadLine();
 
-                        Console.WriteLine("enter product category (or press enter for skip: ");
-
+                        Console.WriteLine("enter product category (or press enter for skip): ");
                         string? inputSearchCategory = Console.ReadLine();
 
-                        Console.WriteLine("enter product min price (or press enter for skip: ");
-
+                        Console.WriteLine("enter product min price (or press enter for skip): ");
                         string? inputSearchMinPrice = Console.ReadLine();
 
-                        decimal.TryParse(inputSearchMinPrice, out decimal IntInputSearchMinPrice);
+                        if (!decimal.TryParse(inputSearchMinPrice, out decimal IntInputSearchMinPrice))
+                        {
+                            Console.WriteLine("invalid min price: enter a number");
+                            continue;
+                        }
 
-                        SalesReportService ProductSearchReport = new SalesReportService(service.GetProducts(), service.GetOrders(), service.GetCustomers());
+                        IEnumerable<Product> productsSearch = [];
+                        IEnumerable<Customer> customersSearch = [];
+                        IEnumerable<Order> ordersSearch = [];
+
+                        try
+                        {
+                            productsSearch = service.GetProducts();
+                            customersSearch = service.GetCustomers();
+                            ordersSearch = service.GetOrders();
+                        }
+                        catch (Exception ex)
+                        {
+                            Console.WriteLine(ex.Message);
+                            continue;
+                        }
+
+                        SalesReportService ProductSearchReport = new SalesReportService(productsSearch, ordersSearch, customersSearch);
 
                         var filteredProducts = ProductSearchReport.GetDynamicProductSearch(inputSearchName, inputSearchCategory, IntInputSearchMinPrice);
+
                         //here the query is ready we just iterate through it and get the products
                         if (filteredProducts == default)
                         {
@@ -291,10 +365,27 @@ Select an option:
 
                     case 9:
                         //display sales reports
+
+                        IEnumerable<Product> productsReport;
+                        IEnumerable<Order> ordersReport;
+                        IEnumerable<Customer> customersReport;
+
+                        try
+                        {
+                            productsReport = service.GetProducts();
+                            ordersReport = service.GetOrders();
+                            customersReport = service.GetCustomers();
+                        }
+                        catch (Exception ex)
+                        {
+                            Console.WriteLine(ex.Message);
+                            continue;
+                        }
+
                         var reportService = new SalesReportService(
-                            service.GetProducts(),
-                            service.GetOrders(),
-                            service.GetCustomers()
+                            productsReport,
+                            ordersReport,
+                            customersReport
                         );
 
                         //challenge 2: Product Projection
@@ -470,7 +561,7 @@ Select an option:
                         if (query == null)
                         {
                             Console.WriteLine("No Orders With Price Above 100");
-                            return;
+                            continue;
                         }
                         else
                         {
