@@ -18,9 +18,7 @@ namespace Store_System.Models
         {
             if (this.QuantityInStock - quantity < 0 || quantity <= 0)
             {
-                //inform the user that nothing changes
-                Console.WriteLine("invalid quantity");
-                return;
+                throw new ArgumentOutOfRangeException("INVALID STOCK: MUST BE STOCK > 0 AND STOCK <= QUANTITY", nameof(quantity));
             }
 
             this.QuantityInStock -= quantity;
@@ -30,8 +28,7 @@ namespace Store_System.Models
         {
             if (quantity <= 0)
             {
-                Console.WriteLine("invalid quantity");
-                return;
+                throw new ArgumentException("INVALID STOCK: MSUT BE STOCK > 0", nameof(quantity));
             }
 
             this.QuantityInStock += quantity;
@@ -56,7 +53,7 @@ Quantity in stock: {this.QuantityInStock}
             
             if (string.IsNullOrWhiteSpace(name))
             {
-                throw new Exception("INVALID NAME: IS_NULL_OR_EMPTY VALIDATION FAILED");
+                throw new ArgumentException("INVALID NAME: IS_NULL_OR_EMPTY VALIDATION FAILED", nameof(name));
             }
 
             Name = name;
@@ -64,7 +61,7 @@ Quantity in stock: {this.QuantityInStock}
 
             if (string.IsNullOrWhiteSpace(category))
             {
-                throw new Exception("INVALID CATEGORY: IS_NULL_OR_EMPTY VALIDATION FAILED");
+                throw new ArgumentException("INVALID CATEGORY: IS_NULL_OR_EMPTY VALIDATION FAILED", nameof(category);
             }
 
             Category = category;
@@ -72,7 +69,7 @@ Quantity in stock: {this.QuantityInStock}
 
             if (price <= 0)
             {
-                throw new Exception("INVALID PRICE: MUST BE GREATER THAN ZERO");
+                throw new ArgumentException("INVALID PRICE: MUST BE GREATER THAN ZERO", nameof(price));
             }
 
             Price = price;
@@ -80,7 +77,7 @@ Quantity in stock: {this.QuantityInStock}
 
             if (quantity < 0)
             {
-                throw new Exception("INVALID QUANTITY: MUST BE NOT NEGATIVE");
+                throw new ArgumentException("INVALID QUANTITY: MUST BE NOT NEGATIVE", nameof(quantity));
             }
 
             QuantityInStock = quantity;

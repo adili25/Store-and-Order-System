@@ -32,8 +32,7 @@ Items:
         {
             if (this.Status == OrderStatus.Completed)
             {
-                Console.WriteLine("invalid addItem: can't add item to completed order");
-                return;
+                throw new InvalidOperationException("INVALID ADD ITEM: THE ORDER IS COMPLETED");
             }
 
             Items.Add(item);
@@ -52,13 +51,12 @@ Items:
         {
             if (!Items.Any())
             {
-                throw new Exception("INVALID ORDER STATUS: MUST BE ATLEAST ONE ITEM");
+                throw new InvalidOperationException("INVALID COMPLETE ORDER: MUST BE AT LEAST ONE ITEM");
             }
 
             if (this.Status == OrderStatus.Cancelled)
             {
-                Console.WriteLine("invalid order status: can't change status of cancelled order");
-                return;
+                throw new InvalidOperationException("INVALID COMPELTE ORDER: ORDER STATUS IS CANCELLED");
             }
 
             this.Status = OrderStatus.Completed;
@@ -69,8 +67,7 @@ Items:
         {
             if (this.Status == OrderStatus.Completed)
             {
-                Console.WriteLine("the current order is completed, you cannot cancel it");
-                return;
+                throw new InvalidOperationException("INVALID CANCEL ORDER: ORDER COMPLETED");
             }
 
             this.Status = OrderStatus.Cancelled;
@@ -79,6 +76,10 @@ Items:
         //to create an empty order, then add into it the items
         public Order(string customerId)
         {
+            if (string.IsNullOrWhiteSpace(customerId))
+            {
+                throw new ArgumentException("INVALID CREATE ORDER: CUSTOMER ID IS_NULL_OR_WHITESPACE", nameof(customerId));
+            }
             CustomerId = customerId;
 
             Status = OrderStatus.Pending;
@@ -88,11 +89,19 @@ Items:
 
         public Order(List<OrderItem> items, string customerId)
         {
+            if (string.IsNullOrWhiteSpace(customerId))
+            {
+                throw new ArgumentException("INVALID CREATE ORDER: CUSTOMER ID IS_NULL_OR_WHITESPACE", nameof(customerId));
+            }
             CustomerId = customerId;
 
-            Status = OrderStatus.Completed;
-
+            if (!items.Any())
+            {
+                throw new ArgumentException("INVALID CREATE ORDER: NO ITEM IN ITEMS LIST", nameof(items));
+            }
             Items = items;
+
+            Status = OrderStatus.Completed;
         }
     }
 }

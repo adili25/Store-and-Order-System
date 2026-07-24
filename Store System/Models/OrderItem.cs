@@ -30,15 +30,15 @@ Quantity * Price: {TotalPrice}
 
             if (quantity < 0)
             {
-                throw new Exception("INVALID QUANTITY: MUST BE GRATER THAN ZERO");
+                throw new ArgumentException("INVALID QUANTITY: MUST BE GRATER THAN ZERO", nameof(quantity));
             }
 
             Quantity = quantity;
 
 
-            if (UnitPrice < 0)
+            if (unitPrice < 0)
             {
-                throw new Exception("INVALID PRICE: MUST BE GRATER THAN ZERO");
+                throw new ArgumentException("INVALID PRICE: MUST BE GRATER THAN ZERO", nameof(unitPrice));
             }
 
             UnitPrice = unitPrice;

@@ -19,18 +19,20 @@ namespace Store_System.Models
             //isnullorwhitespace: check the white speces, most of the time this we use this one
             if (string.IsNullOrWhiteSpace(fullName))
             {
-                throw new Exception("INVALID NAME: IS_NULL_OR_EMPTY VALIDATION FAILED");
+                throw new ArgumentException("INVALID NAME: IS_NULL_OR_EMPTY VALIDATION FAILED", nameof(fullName));
             }
-
             FullName = fullName;
 
-
-            if (string.IsNullOrWhiteSpace(email) || !email.Contains("@"))
+            if (string.IsNullOrWhiteSpace(email))
             {
-                throw new Exception("INVALID EMAIL: MUST CONTAIN '@'");
+                throw new ArgumentException("INVALID EMAIL: IS_NULLOR_EMPTY VALIDATION FAILED", nameof(email));
             }
-
+            if (!email.Contains('@'))
+            {
+                throw new ArgumentException("INVALID EMAIL: MUST CONTAIN '@'", nameof(email));
+            }
             Email = email ;
+        
         }
 
         public abstract void DisplayInfo();
